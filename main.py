@@ -6,7 +6,8 @@ import cv2 as cv
 import numpy as np
 from datetime import datetime
 
-known_face_names, known_face_encodings = load_face.load_faces()
+facedir = 'face/'
+known_face_names, known_face_encodings = load_face.load_faces(facedir)
 
 # video_capture = cv.VideoCapture('http://192.168.1.71:8080/video')
 video_capture = cv.VideoCapture(0)
@@ -17,6 +18,7 @@ unknown_faces_ids = []
 unknown_faces_encodings = []
 unknown_faces_ages = []
 unknown_faces_areas = []
+unknown_faces_pixels = []
 while True:
     # Grab a single frame of video
     ret, frame = video_capture.read()
@@ -58,6 +60,22 @@ while True:
                     if face_area > unknown_faces_areas[u_best_match_index]:
                         unknown_faces_areas[u_best_match_index] = face_area
                         unknown_faces_encodings[u_best_match_index] = face_encoding
+
+                        top *= resize_factor
+                        right *= resize_factor
+                        bottom *= resize_factor
+                        left *= resize_factor
+
+                        unknown_faces_pixels[u_best_match_index] = frame[top:bottom, left:right].copy()
+                    if unknown_faces_areas[u_best_match_index] > 70000 and (datetime.now() - unknown_faces_ages[u_best_match_index]).seconds > 7:
+                        cv.imwrite(facedir + 'Person ' + str(unknown_faces_ids[u_best_match_index]) + '.jpg', unknown_faces_pixels[u_best_match_index])
+                        known_face_names.append('Person ' + str(unknown_faces_ids[u_best_match_index]))
+                        known_face_encodings.append(unknown_faces_encodings[u_best_match_index])
+                        del unknown_faces_ids[u_best_match_index]
+                        del unknown_faces_encodings[u_best_match_index]
+                        del unknown_faces_ages[u_best_match_index]
+                        del unknown_faces_areas[u_best_match_index]
+                        del unknown_faces_pixels[u_best_match_index]
                     found = True
 
             if not found:
@@ -65,6 +83,14 @@ while True:
                 unknown_faces_ages.append(datetime.now())
                 unknown_faces_encodings.append(face_encoding)
                 unknown_faces_areas.append(face_area)
+
+                top *= resize_factor
+                right *= resize_factor
+                bottom *= resize_factor
+                left *= resize_factor
+
+                unknown_faces_pixels.append(frame[top:bottom, left:right].copy())
+
                 unknown_next += 1
 
             face_names.append(name)
