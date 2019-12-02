@@ -7,8 +7,8 @@ import numpy as np
 
 known_face_names, known_face_encodings = load_face.load_faces()
 
-# video_capture = cv.VideoCapture('http://192.168.1.71:8080/video')
-video_capture = cv.VideoCapture(0)
+video_capture = cv.VideoCapture('http://192.168.1.68:8080/video')
+# video_capture = cv.VideoCapture(0)
 process_this_frame = True
 resize_factor = 1
 while True:
