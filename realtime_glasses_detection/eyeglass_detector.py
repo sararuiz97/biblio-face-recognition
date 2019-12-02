@@ -95,7 +95,7 @@ def judge_eyeglass(img):
 
     sobel_y = cv2.Sobel(img, cv2.CV_64F, 0 ,1 , ksize=-1) #y方向sobel边缘检测
     sobel_y = cv2.convertScaleAbs(sobel_y) #转换回uint8类型
-    cv2.imshow('sobel_y',sobel_y)
+    # cv2.imshow('sobel_y',sobel_y)
 
     edgeness = sobel_y #边缘强度矩阵
 
@@ -124,16 +124,16 @@ def judge_eyeglass(img):
     measure_2 = sum(sum(roi_2/255)) / (np.shape(roi_2)[0] * np.shape(roi_2)[1])#计算评价值
     measure = measure_1*0.3 + measure_2*0.7
 
-    cv2.imshow('roi_1',roi_1)
-    cv2.imshow('roi_2',roi_2)
-    print(measure)
+    # cv2.imshow('roi_1',roi_1)
+    # cv2.imshow('roi_2',roi_2)
+    # print(measure)
 
     #根据评价值和阈值的关系确定判别值
     if measure > 0.15:#阈值可调，经测试在0.15左右
         judge = True
     else:
         judge = False
-    print(judge)
+    # print(judge)
     return judge
 
 #==============================================================================

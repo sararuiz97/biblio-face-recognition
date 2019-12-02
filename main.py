@@ -5,7 +5,7 @@ import face_recognition
 import cv2 as cv
 import numpy as np
 from datetime import datetime
-from realtime_glasses_detection.eyeglass_detector import judge_eyeglass
+import eyeglass
 
 def delete_old_unknown():
     i = 0
@@ -26,7 +26,7 @@ known_face_names, known_face_encodings = load_face.load_faces(facedir)
 # video_capture = cv.VideoCapture('http://192.168.1.71:8080/video')
 video_capture = cv.VideoCapture(0)
 process_this_frame = True
-resize_factor = 4
+resize_factor = 1
 unknown_next = 0
 unknown_faces_ids = []
 unknown_faces_encodings = []
@@ -52,12 +52,12 @@ while True:
 
         face_names = []
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-            print(judge_eyeglass(small_frame[top:bottom, left:right]))
             # See if the face is a match for the known face(s)
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
             name = 'Unknown ' + str(unknown_next)
             found = False
             face_area = (bottom - top) * (right - left)
+            has_glasses = eyeglass.has_glasses(small_frame[top:bottom, left:right])
 
             # Use the known face with the smallest distance to the new face
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
