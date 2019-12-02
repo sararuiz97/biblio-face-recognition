@@ -6,6 +6,19 @@ import cv2 as cv
 import numpy as np
 from datetime import datetime
 
+def delete_old_unknown():
+    i = 0
+    while i < len(unknown_faces_ids):
+        if (datetime.now() - unknown_faces_lastmatch[i]).seconds > 5:
+            del unknown_faces_ids[i]
+            del unknown_faces_encodings[i]
+            del unknown_faces_ages[i]
+            del unknown_faces_areas[i]
+            del unknown_faces_pixels[i]
+            del unknown_faces_lastmatch[i]
+            i -= 1
+        i += 1
+
 facedir = 'face/'
 known_face_names, known_face_encodings = load_face.load_faces(facedir)
 
@@ -17,6 +30,7 @@ unknown_next = 0
 unknown_faces_ids = []
 unknown_faces_encodings = []
 unknown_faces_ages = []
+unknown_faces_lastmatch = []
 unknown_faces_areas = []
 unknown_faces_pixels = []
 while True:
@@ -55,6 +69,7 @@ while True:
                 u_face_distances = face_recognition.face_distance(unknown_faces_encodings, face_encoding)
                 u_best_match_index = np.argmin(u_face_distances)
                 if u_matches[u_best_match_index]:
+                    unknown_faces_lastmatch[u_best_match_index] = datetime.now()
                     name = 'Unknown ' + str(unknown_faces_ids[u_best_match_index])
                     # Consider the bigger encoding as better and keep it
                     if face_area > unknown_faces_areas[u_best_match_index]:
@@ -76,11 +91,13 @@ while True:
                         del unknown_faces_ages[u_best_match_index]
                         del unknown_faces_areas[u_best_match_index]
                         del unknown_faces_pixels[u_best_match_index]
+                        del unknown_faces_lastmatch[u_best_match_index]
                     found = True
 
             if not found:
                 unknown_faces_ids.append(unknown_next)
                 unknown_faces_ages.append(datetime.now())
+                unknown_faces_lastmatch.append(datetime.now())
                 unknown_faces_encodings.append(face_encoding)
                 unknown_faces_areas.append(face_area)
 
@@ -94,6 +111,8 @@ while True:
                 unknown_next += 1
 
             face_names.append(name)
+
+    delete_old_unknown()
 
     process_this_frame = not process_this_frame
 
