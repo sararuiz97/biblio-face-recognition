@@ -21,7 +21,8 @@ def delete_old_unknown():
         i += 1
 
 facedir = 'face/'
-known_face_names, known_face_encodings = load_face.load_faces(facedir)
+known_face_names, known_face_encodings, known_face_images = load_face.load_faces(facedir)
+eyeglass_map = eyeglass.glasses_map(known_face_names, known_face_images)
 
 # video_capture = cv.VideoCapture('http://192.168.1.68:8080/video')
 video_capture = cv.VideoCapture(0)
@@ -51,6 +52,7 @@ while True:
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
         face_names = []
+        face_changes = []
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             # See if the face is a match for the known face(s)
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
@@ -61,9 +63,7 @@ while True:
 
             # Use the known face with the smallest distance to the new face
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-            best_match_index = np.argmin(face_distances)
-            if matches[best_match_index]:
-                name = known_face_names[best_match_index]
+            best_match_index = np.argmin(face_dihas_glasses == ch_index]
                 found = True
 
             if not found and len(unknown_faces_encodings) > 0:
@@ -86,14 +86,13 @@ while True:
                         unknown_faces_pixels[u_best_match_index] = frame[top:bottom, left:right].copy()
                     if unknown_faces_areas[u_best_match_index] > 70000 and (datetime.now() - unknown_faces_ages[u_best_match_index]).seconds > 7:
                         cv.imwrite(facedir + 'Person ' + str(unknown_faces_ids[u_best_match_index]) + '.jpg', unknown_faces_pixels[u_best_match_index])
-                        known_face_names.append('Person ' + str(unknown_faces_ids[u_best_match_index]))
-                        known_face_encodings.append(unknown_faces_encodings[u_best_match_index])
                         del unknown_faces_ids[u_best_match_index]
                         del unknown_faces_encodings[u_best_match_index]
                         del unknown_faces_ages[u_best_match_index]
                         del unknown_faces_areas[u_best_match_index]
                         del unknown_faces_pixels[u_best_match_index]
                         del unknown_faces_lastmatch[u_best_match_index]
+                        known_face_names, known_face_encodings, known_face_images = load_face.load_faces(facedir)
                     found = True
 
             if not found:
@@ -112,7 +111,12 @@ while True:
 
                 unknown_next += 1
 
+            glass_change = (has_glasses in eyeglass_map) and not (has_glasses == eyeglass_map[name])
+            beard_change = False
+
             face_names.append(name)
+            face_changes.append((glass_change, beard_change))
+
 
     delete_old_unknown()
 
@@ -120,7 +124,7 @@ while True:
 
 
     # Display the results
-    for (top, right, bottom, left), name in zip(face_locations, face_names):
+    for (top, right, bottom, left), name, (glass_change, beard_change) in zip(face_locations, face_names, face_changes):
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
         top *= resize_factor
         right *= resize_factor
@@ -134,6 +138,11 @@ while True:
         cv.rectangle(frame, (left, bottom - 20), (right, bottom), (0, 0, 255), cv.FILLED)
         font = cv.FONT_HERSHEY_DUPLEX
         cv.putText(frame, name, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+
+        if glass_change:
+            cv.rectangle(frame, (left, bottom), (right, bottom + 20), (0, 0, 255), cv.FILLED)
+            font = cv.FONT_HERSHEY_DUPLEX
+            cv.putText(frame, name, (left + 6, bottom + 6), font, 0.5, (255, 255, 255), 1)
 
     # Display the resulting image
     cv.imshow('Video', frame)

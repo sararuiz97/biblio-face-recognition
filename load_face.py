@@ -1,5 +1,5 @@
 import face_recognition
-import cv2
+import cv2 as cv
 import numpy as np
 import glob
 import re
@@ -13,5 +13,8 @@ def load_faces(dir = 'face/'):
         face_recognition.face_encodings(
             face_recognition.load_image_file(f)
         )[0]
+        for f in fnames
+    ], [
+        cv.imread(f),
         for f in fnames
     ]

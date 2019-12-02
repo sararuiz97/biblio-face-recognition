@@ -14,3 +14,9 @@ def has_glasses(img):
     LEFT_EYE_CENTER, RIGHT_EYE_CENTER = eyeglasses.get_centers(img, landmarks)
     aligned_face = eyeglasses.get_aligned_face(gray, LEFT_EYE_CENTER, RIGHT_EYE_CENTER)
     return eyeglasses.judge_eyeglass(aligned_face)
+
+def glasses_map(face_names, face_images):
+    return {
+        name: has_glasses(img)
+        for (name, img) in zip(face_names, face_images)
+    }
