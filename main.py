@@ -57,6 +57,7 @@ while True:
         face_names = []
         face_changes = []
         lookalike_names = []
+        face_is_far = False
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             # See if the face is a match for the known face(s)
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
@@ -99,6 +100,9 @@ while True:
                         del unknown_faces_pixels[u_best_match_index]
                         del unknown_faces_lastmatch[u_best_match_index]
                         known_face_names, known_face_encodings, known_face_images = load_face.load_faces(facedir)
+                        eyeglass_map = eyeglass.glasses_map(known_face_names, known_face_images)
+                    else:
+                        face_is_far = True
                     found = True
 
             if not found:
@@ -163,6 +167,11 @@ while True:
     cv.rectangle(frame, (0, 0), (width, 30), (255, 255, 255), cv.FILLED)
     font = cv.FONT_HERSHEY_DUPLEX
     cv.putText(frame, 'Privacy policy can be accessed at: http://jeje.com', (6, 30 - 6), font, 0.75, (0, 0, 0), 1)
+
+    if face_is_far:
+        cv.rectangle(frame, (0, 30), (width, 60), (255, 255, 255), cv.FILLED)
+        font = cv.FONT_HERSHEY_DUPLEX
+        cv.putText(frame, 'Get closer if you want me to remember your face!', (6, 60 - 6), font, 0.75, (0, 0, 0), 1)
 
     # Display the resulting image
     cv.imshow('Video', frame)
