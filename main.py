@@ -30,7 +30,7 @@ celebrity_face_names, celebrity_face_encodings, celebrity_face_images = load_fac
 
 # video_capture = cv.VideoCapture('http://192.168.1.68:8080/video')
 video_capture = cv.VideoCapture(0)
-process_this_frame = True
+process_this_frame = 0
 resize_factor = 1
 unknown_next = 0
 unknown_faces_ids = []
@@ -50,7 +50,7 @@ while True:
     rgb_small_frame = small_frame[:, :, ::-1]
 
     # Only process every other frame of video to save time
-    if process_this_frame:
+    if process_this_frame == 0:
         # Find all the faces and face encodings in the current frame of video
         face_locations = face_recognition.face_locations(rgb_small_frame)
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
@@ -135,7 +135,7 @@ while True:
 
     delete_old_unknown()
 
-    process_this_frame = not process_this_frame
+    process_this_frame = (process_this_frame + 1) % 5
 
 
     # Display the results
@@ -146,24 +146,26 @@ while True:
         bottom *= resize_factor
         left *= resize_factor
 
-        # Draw a box around the face
-        cv.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+        # # Draw a box around the face
+        # cv.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
         # Apply filter
-        filters.put_hat(frame, left, top, right - left, bottom - top)
-        filters.put_moustache(frame, left, top, right - left, bottom - top)
+        # filters.put_hat(frame, left, top, right - left, bottom - top)
+        # filters.put_moustache(frame, left, top, right - left, bottom - top)
+
+        filters.put_dog_filter(frame, left, top, right - left, bottom - top)
 
         # Draw a label with a name below the face
         cv.rectangle(frame, (left, bottom - 20), (right, bottom), (0, 0, 255), cv.FILLED)
         font = cv.FONT_HERSHEY_DUPLEX
         cv.putText(frame, name, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
 
-        cv.rectangle(frame, (left - 1, bottom), (right + 1, bottom + 20), (120, 0, 120), cv.FILLED)
+        cv.rectangle(frame, (left, bottom), (right, bottom + 20), (120, 0, 120), cv.FILLED)
         font = cv.FONT_HERSHEY_DUPLEX
         cv.putText(frame, 'Lookalike: ' + lookalike_name, (left + 6, bottom + 20 - 6), font, 0.5, (255, 255, 255), 1)
 
         if glass_change:
-            cv.rectangle(frame, (left - 1, bottom + 20), (right + 1, bottom + 40), (255, 0, 0), cv.FILLED)
+            cv.rectangle(frame, (left, bottom + 20), (right, bottom + 40), (255, 0, 0), cv.FILLED)
             font = cv.FONT_HERSHEY_DUPLEX
             cv.putText(frame, 'What\'s with the glasses?', (left + 6, bottom + 40 - 6), font, 0.5, (255, 255, 255), 1)
 

@@ -72,13 +72,13 @@ def put_dog_filter(fc,x,y,w,h):
     face_width = w
     face_height = h
 
-    dog_width = int(face_width*1.5)
-    dog_height = int(face_height*1.75)
+    dog_width = int(face_width*1.6)
+    dog_height = int(face_height*2.8)
 
     dog = cv.resize(dog_img,(dog_width, dog_height))
 
-    x1, x2 = x - int(0.25*w), x - int(0.25*w) + dog_width
-    y1, y2 = y - int(0.375*h) - 1, y - int(0.375*h) - 1 + dog_height
+    x1, x2 = x - int(0.4*w), x - int(0.4*w) + dog_width
+    y1, y2 = y - int(0.8*h) - 1, y - int(0.8*h) - 1 + dog_height
 
     fc_x1, fc_x2 = max(0, x1), min(fc_width, x2)
     fc_y1, fc_y2 = max(0, y1), min(fc_height, y2)
