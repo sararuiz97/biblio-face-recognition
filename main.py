@@ -123,14 +123,17 @@ while True:
                 unknown_next += 1
 
             glass_change = (name in eyeglass_map) and has_glasses != eyeglass_map[name]
-            beard_change = False
 
             lookalike_distances = face_recognition.face_distance(celebrity_face_encodings, face_encoding)
             lookalike_best_match_index = np.argmin(lookalike_distances)
             lookalike_names.append(celebrity_face_names[lookalike_best_match_index])
 
+            filter_type = None
+            if found:
+                filter_type = hash(name) % 4
+
             face_names.append(name)
-            face_changes.append((glass_change, beard_change))
+            face_changes.append((glass_change, filter_type))
 
 
     delete_old_unknown()
@@ -139,7 +142,7 @@ while True:
 
 
     # Display the results
-    for (top, right, bottom, left), name, (glass_change, beard_change), lookalike_name in zip(face_locations, face_names, face_changes, lookalike_names):
+    for (top, right, bottom, left), name, (glass_change, filter_type), lookalike_name in zip(face_locations, face_names, face_changes, lookalike_names):
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
         top *= resize_factor
         right *= resize_factor
@@ -150,10 +153,15 @@ while True:
         # cv.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
         # Apply filter
-        # filters.put_hat(frame, left, top, right - left, bottom - top)
-        # filters.put_moustache(frame, left, top, right - left, bottom - top)
-
-        filters.put_dog_filter(frame, left, top, right - left, bottom - top)
+        if filter_type == 0:
+            filters.put_dog_filter(frame, left, top, right - left, bottom - top)
+        elif filter_type == 1:
+            filters.put_hat(frame, left, top, right - left, bottom - top)
+        elif filter_type == 2:
+            filters.put_moustache(frame, left, top, right - left, bottom - top)
+        elif filter_type == 3:
+            filters.put_hat(frame, left, top, right - left, bottom - top)
+            filters.put_moustache(frame, left, top, right - left, bottom - top)
 
         # Draw a label with a name below the face
         cv.rectangle(frame, (left, bottom - 20), (right, bottom), (0, 0, 255), cv.FILLED)
