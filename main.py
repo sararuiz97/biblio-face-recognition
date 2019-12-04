@@ -6,6 +6,7 @@ import cv2 as cv
 import numpy as np
 from datetime import datetime
 import eyeglass
+import filters.filters as filters
 
 def delete_old_unknown():
     i = 0
@@ -147,6 +148,9 @@ while True:
 
         # Draw a box around the face
         cv.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+
+        # Apply filter
+        filters.put_dog_filter(frame, left, top, right - left, bottom - top)
 
         # Draw a label with a name below the face
         cv.rectangle(frame, (left, bottom - 20), (right, bottom), (0, 0, 255), cv.FILLED)
