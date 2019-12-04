@@ -21,8 +21,11 @@ def delete_old_unknown():
         i += 1
 
 facedir = 'face/'
+celebritydir = 'celebrities/'
 known_face_names, known_face_encodings, known_face_images = load_face.load_faces(facedir)
 eyeglass_map = eyeglass.glasses_map(known_face_names, known_face_images)
+
+celebrity_face_names, celebrity_face_encodings, celebrity_face_images = load_face.load_faces(celebritydir)
 
 # video_capture = cv.VideoCapture('http://192.168.1.68:8080/video')
 video_capture = cv.VideoCapture(0)
@@ -53,6 +56,7 @@ while True:
 
         face_names = []
         face_changes = []
+        lookalike_names = []
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             # See if the face is a match for the known face(s)
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
@@ -63,7 +67,9 @@ while True:
 
             # Use the known face with the smallest distance to the new face
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-            best_match_index = np.argmin(face_dihas_glasses == ch_index]
+            best_match_index = np.argmin(face_distances)
+            if matches[best_match_index]:
+                name = known_face_names[best_match_index]
                 found = True
 
             if not found and len(unknown_faces_encodings) > 0:
@@ -111,8 +117,12 @@ while True:
 
                 unknown_next += 1
 
-            glass_change = (has_glasses in eyeglass_map) and not (has_glasses == eyeglass_map[name])
+            glass_change = (name in eyeglass_map) and has_glasses != eyeglass_map[name]
             beard_change = False
+
+            lookalike_distances = face_recognition.face_distance(celebrity_face_encodings, face_encoding)
+            lookalike_best_match_index = np.argmin(lookalike_distances)
+            lookalike_names.append(celebrity_face_names[lookalike_best_match_index])
 
             face_names.append(name)
             face_changes.append((glass_change, beard_change))
@@ -124,7 +134,7 @@ while True:
 
 
     # Display the results
-    for (top, right, bottom, left), name, (glass_change, beard_change) in zip(face_locations, face_names, face_changes):
+    for (top, right, bottom, left), name, (glass_change, beard_change), lookalike_name in zip(face_locations, face_names, face_changes, lookalike_names):
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
         top *= resize_factor
         right *= resize_factor
@@ -139,10 +149,20 @@ while True:
         font = cv.FONT_HERSHEY_DUPLEX
         cv.putText(frame, name, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
 
+        cv.rectangle(frame, (left - 1, bottom), (right + 1, bottom + 20), (120, 0, 120), cv.FILLED)
+        font = cv.FONT_HERSHEY_DUPLEX
+        cv.putText(frame, 'Lookalike: ' + lookalike_name, (left + 6, bottom + 20 - 6), font, 0.5, (255, 255, 255), 1)
+
         if glass_change:
-            cv.rectangle(frame, (left, bottom), (right, bottom + 20), (0, 0, 255), cv.FILLED)
+            cv.rectangle(frame, (left - 1, bottom + 20), (right + 1, bottom + 40), (255, 0, 0), cv.FILLED)
             font = cv.FONT_HERSHEY_DUPLEX
-            cv.putText(frame, name, (left + 6, bottom + 6), font, 0.5, (255, 255, 255), 1)
+            cv.putText(frame, 'What\'s with the glasses?', (left + 6, bottom + 40 - 6), font, 0.5, (255, 255, 255), 1)
+
+    height = np.size(frame, 0)
+    width = np.size(frame, 1)
+    cv.rectangle(frame, (0, 0), (width, 30), (255, 255, 255), cv.FILLED)
+    font = cv.FONT_HERSHEY_DUPLEX
+    cv.putText(frame, 'Privacy policy can be accessed at: http://jeje.com', (6, 30 - 6), font, 0.75, (0, 0, 0), 1)
 
     # Display the resulting image
     cv.imshow('Video', frame)

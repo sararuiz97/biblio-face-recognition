@@ -15,6 +15,6 @@ def load_faces(dir = 'face/'):
         )[0]
         for f in fnames
     ], [
-        cv.imread(f),
+        cv.imread(f)
         for f in fnames
     ]
