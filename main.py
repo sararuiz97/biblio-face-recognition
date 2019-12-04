@@ -150,7 +150,8 @@ while True:
         cv.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
         # Apply filter
-        filters.put_dog_filter(frame, left, top, right - left, bottom - top)
+        filters.put_hat(frame, left, top, right - left, bottom - top)
+        filters.put_moustache(frame, left, top, right - left, bottom - top)
 
         # Draw a label with a name below the face
         cv.rectangle(frame, (left, bottom - 20), (right, bottom), (0, 0, 255), cv.FILLED)

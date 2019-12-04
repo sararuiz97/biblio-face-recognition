@@ -41,13 +41,13 @@ def put_hat(fc,x,y,w,h):
     face_width = w
     face_height = h
 
-    hat_width = face_width+1
-    hat_height = int(0.35*face_height)+1
+    hat_width = face_width * 2
+    hat_height = int(0.5*face_height)+1
 
     hat = cv.resize(hat_img,(hat_width,hat_height))
 
-    x1, x2 = x, x + hat_width
-    y1, y2 = y - int(0.25*face_height), y - int(0.25*face_height) + hat_height
+    x1, x2 = x - face_width // 2, x - face_width // 2 + hat_width
+    y1, y2 = y - int(0.5*face_height), y - int(0.5*face_height) + hat_height
 
     fc_x1, fc_x2 = max(0, x1), min(fc_width, x2)
     fc_y1, fc_y2 = max(0, y1), min(fc_height, y2)
